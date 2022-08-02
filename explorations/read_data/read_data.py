@@ -32,9 +32,9 @@ def main():
         print(f"Data is of size {num_imgs} x {h} x {w}")
         
         digits = [5, 0, 4]
-        # for i in range(3):
-        #     img = read_img(file, h, w)
-        #     print(f"Data: {img[0, 0]} {img[10, 10]}  {img[11, 15]}")
+        for i in range(3):
+            img = read_img(file, h, w)
+            print(f"Data: {img[10, 11]} {img[10, 10]}  {img[11, 15]}")
         
         #     plt.imshow(img)
         #     plt.show()

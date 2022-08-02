@@ -18,6 +18,44 @@ public:
             assert(elements[i].size() == w);
         }
     }
+    Matrix(vector<dType> arr, bool as_row = 0): h(arr.size()), w(1){
+        vector<vector<dType> > inp(arr.size());
+        if(as_row){
+            inp = {arr};
+        } else {
+            for(int i = 0;i<arr.size();i++){
+                inp[i] = {arr[i]};
+            }
+        }
+
+        elements = inp;
+    }
+
+    Matrix<dType> columnize(){ //Create Matrix which has the same data stored in column shape
+        vector<vector<dType> > reshaped_data(h*w, vector<dType>(1));
+        for(int i = 0;i<h;i++){
+            for(int j = 0;j<w;j++){
+                reshaped_data[i*w + j][0] = elements[i][j];
+            }
+        }
+
+        return Matrix<dType>(reshaped_data);
+        
+    }
+
+    void print(bool print_all = false){
+        int upper_limit = 5;
+        if(print_all)
+            upper_limit = max(h, w);
+        cout << "Matrix " << endl;
+        for(int i = 0;i<min(h, upper_limit);i++){
+            for(int j = 0;j<min(w, upper_limit);j++){
+                cout << elements[i][j] << ' ';
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
 
     Matrix<dType> operator+(const Matrix<dType> &other){
         assert(other.h == h);
@@ -60,6 +98,12 @@ public:
         
         return Matrix<dType>(res);
     }
+
+    dType operator[](pair<int, int> indeces){
+        int i = indeces.first, j = indeces.second;
+        return elements[i][j];
+    }
 };
+
 
 #endif

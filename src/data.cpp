@@ -1,6 +1,4 @@
-#include <iostream>
 #include "utils.hpp"
-
 
 using namespace std;
 
@@ -15,8 +13,8 @@ int reverseInt(unsigned char *a)
 }
 
 //Return vector of images with corresponding labels, digits 0-9
-vector<pair<Matrix<int>, int > > read_training_batch(){
-    vector<pair<Matrix<int>, int> > res;
+vector<pair<Matrix<int>, int> > read_training_batch(int batch_size){
+    datalist res;
     vector<Matrix<int>> imgs;
     /*
         Might add functionality to randomly choose subgroup of all 60000
@@ -43,18 +41,20 @@ vector<pair<Matrix<int>, int > > read_training_batch(){
         assert(magic == 2051 && h == 28 && w == 28);
 
         for(int n = 0;n<num_imgs;n++){
-            unsigned int img[28][28];
+            unsigned char img[28][28];
             fread(img, 28, 28, pFile);
             vector<vector<int> > data(28, vector<int>(28));
             for(int i = 0;i<28;i++){
                 for(int j = 0;j<28;j++){
                     data[i][j] = (int) img[i][j];
+                    assert(data[i][j] >= 0 && data[i][j] < 256);
                 }
             }
             imgs.push_back(Matrix<int>(data));
         }
         fclose(pFile);
     }
+    cout << " images read." << endl;
     {
         //Label images
         FILE * pFile = fopen(
@@ -71,18 +71,21 @@ vector<pair<Matrix<int>, int > > read_training_batch(){
         assert(num_labels == imgs.size() && magic == 2049);
         unsigned char labels[num_labels];
         fread(labels, 1, num_labels, pFile);
+        cout << "Labels read " << endl;
 
-        for(int n = 0;n<num_labels;n++){
+        for(int n = 0;n<batch_size;n++){
+            assert(labels[n] <10 && labels[n] >= 0);
             res.push_back(pair<Matrix<int>, int>(imgs[n], (int) labels[n]));
         }
     }
+    cout << "Done " << "returning datalist of length " << batch_size <<endl;
 
     return res;
 }
 
 //Return vector of images with corresponding labels, digits 0-9
-vector<pair<Matrix<int>, int > > read_test_data(){
-    vector<pair<Matrix<int>, int> > res;
+vector<pair<Matrix<int>, int> > read_test_data(){
+    datalist res;
     vector<Matrix<int>> imgs;
 
     {
@@ -112,6 +115,7 @@ vector<pair<Matrix<int>, int > > read_test_data(){
             for(int i = 0;i<28;i++){
                 for(int j = 0;j<28;j++){
                     data[i][j] = (int) img[i][j];
+                    assert(data[i][j] >= 0 && data[i][j] < 256);
                 }
             }
             imgs.push_back(Matrix<int>(data));
