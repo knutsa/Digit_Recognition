@@ -3,7 +3,9 @@
 
 #include <cassert>
 #include <vector>
+#include <set>
 #include <iostream>
+#include <random>
 
 using namespace std;
  
@@ -12,12 +14,14 @@ using namespace std;
 #define ROOT_FOLDER "/home/nils/Desktop/cpp_project"
 
 #include "matrix.hpp"
-typedef vector<pair<Matrix<int>, int> > datalist;
+
+typedef vector<pair<Matrix<int> , int> > datalist;
 #include "network.hpp"
 
 
 void tool();
-vector<pair<Matrix<int>, int> > read_training_batch(int batch_size = 60000);
-vector<pair<Matrix<int>, int> > read_test_data();
+datalist read_training_batch(int batch_size = 60000);
+datalist sample_data(const datalist &data, int sample_size);
+datalist read_test_data();
 
 #endif

@@ -7,19 +7,29 @@ using namespace std;
 
 int main(){
 
-    datalist data = read_training_batch(1);
+    datalist full_data_set = read_training_batch(60000);
     tool();
-    cout << "hallår" << endl;
-    // cout << data[0].first.elements[10][11] << ' ' << data[0].second << endl;
 
-    DigitNetwork AI(1.0);
+    DigitNetwork AI(10);
+    cout << "Initial cost " << AI.cost_function(full_data_set) << endl;
 
     cout << "Training data " << endl;
-    AI.train(data);
+    
+    //Training
+    for(int i = 0;i<100;i++){
+        cout << "Iteration " << i << endl;
+        datalist data_batch = sample_data(full_data_set, 300);
+        AI.train(data_batch);
+    }
 
     cout << "AI trained" << endl;
-    
-    AI.analyze(data[0].first).print();
 
+    for(int i = 0;i<5;i++){
+        cout << "Predictions for image nr " << i << endl;
+        auto res = AI.analyze(full_data_set[0].first);
+        res[res.size()-1].print(true);
+    }    
+
+    cout << "Cost "  << AI.cost_function(full_data_set) << endl;
     // main_test();
 }

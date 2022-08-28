@@ -4,7 +4,7 @@ using namespace std;
 
 
 void tool(){
-    cout << "This is the only non-inline util implemented yet. It is useless!!!" << endl;
+    cout << "This was the first non-inline util implemented. It is useless!!!" << endl;
 }
 
 int reverseInt(unsigned char *a)
@@ -13,9 +13,9 @@ int reverseInt(unsigned char *a)
 }
 
 //Return vector of images with corresponding labels, digits 0-9
-vector<pair<Matrix<int>, int> > read_training_batch(int batch_size){
+datalist read_training_batch(int batch_size){
     datalist res;
-    vector<Matrix<int>> imgs;
+    vector<Matrix<int> > imgs;
     /*
         Might add functionality to randomly choose subgroup of all 60000
     */
@@ -76,6 +76,7 @@ vector<pair<Matrix<int>, int> > read_training_batch(int batch_size){
         for(int n = 0;n<batch_size;n++){
             assert(labels[n] <10 && labels[n] >= 0);
             res.push_back(pair<Matrix<int>, int>(imgs[n], (int) labels[n]));
+            // res.push_back(DataPoint(imgs[n], labels[n]));
         }
     }
     cout << "Done " << "returning datalist of length " << batch_size <<endl;
@@ -83,10 +84,26 @@ vector<pair<Matrix<int>, int> > read_training_batch(int batch_size){
     return res;
 }
 
+datalist sample_data(const datalist &data, int sample_size){
+    datalist sampled(sample_size);
+    set<int> indexes_used;
+
+    for(int i = 0;i<sample_size;i++){
+        int index = random() % data.size();
+        while(indexes_used.find(index) != indexes_used.end()){
+            index = (index+1) % data.size();
+        }
+        sampled[i] = data[index];
+        indexes_used.insert(index);
+    }
+
+    return sampled;
+}
+
 //Return vector of images with corresponding labels, digits 0-9
-vector<pair<Matrix<int>, int> > read_test_data(){
+datalist read_test_data(){
     datalist res;
-    vector<Matrix<int>> imgs;
+    vector<Matrix<int> > imgs;
 
     {
         //Read images
@@ -141,6 +158,7 @@ vector<pair<Matrix<int>, int> > read_test_data(){
 
         for(int n = 0;n<num_labels;n++){
             res.push_back(pair<Matrix<int>, int>(imgs[n], (int) labels[n]));
+            // res.push_back(DataPoint(imgs[n], labels[n]));
         }
     }
 

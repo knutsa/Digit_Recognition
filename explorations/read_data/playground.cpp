@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
 
 #define ROOT_FOLDER "/apa/"
 
@@ -10,7 +11,7 @@ using namespace std;
 struct Car {
     int age;
     int price;
-    float weight;
+    double weight;
 };
 
 
@@ -38,15 +39,14 @@ public:
 
 int main(){
 
-    MyClass A;
-    MyClass &B = A;
-    A.data = {{1,2,3}, {4,5,6}};
-    cout << B.data[0][0] << endl;
-    B.data[0][0] -= 100;
-    cout << A.data[0][0] << endl;
+    default_random_engine generator;
+    normal_distribution<double> distribution(.0, 4.0);
 
-    int x = 10;
-    increase(x);
-    cout << x << endl;
+
+    for(int i = 0;i<10;i++){
+        double x = distribution(generator);
+
+        cout << x << endl;
+    }
 
 }

@@ -5,7 +5,7 @@
 
 template <class dType>
 class Matrix{
-    // 2D matrix with implementation for multiplication, addition, scalar multiplication, dType numeric, i.e long, int float et.c
+    // 2D matrix with implementation for multiplication, addition, scalar multiplication, dType numeric, i.e long, int double et.c
 public:
     vector<vector<dType> > elements;
     int h;
@@ -30,6 +30,7 @@ public:
 
         elements = inp;
     }
+    Matrix(){}
 
     Matrix<dType> columnize(){ //Create Matrix which has the same data stored in column shape
         vector<vector<dType> > reshaped_data(h*w, vector<dType>(1));
@@ -69,6 +70,10 @@ public:
 
         return Matrix<dType>(res);
     }
+    dType operator[](int index){
+        assert(w == 1);
+        return elements[index][0];
+    }
 
     Matrix<dType> operator*(const Matrix<dType> &other){
         assert(w == other.h);
@@ -96,6 +101,19 @@ public:
             }
         }
         
+        return Matrix<dType>(res);
+    }
+
+    Matrix<dType> operator-(const Matrix<dType> &other){
+        assert(other.h == h);
+        assert(other.w == w);
+        vector<vector<dType> > res(h, vector<dType>(w));
+        for(int i = 0;i<h;i++){
+            for(int j = 0;j<w;j++){
+                res[i][j] = elements[i][j] - other.elements[i][j];
+            }
+        }
+
         return Matrix<dType>(res);
     }
 

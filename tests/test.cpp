@@ -19,28 +19,28 @@ void print_mat(Matrix<dType> mat){
 
 void main_test(){
 
-    vector<vector<float> > data1 = {{1,2}, {3, 4}};
-    vector<vector<float> > data2 = {{5, 6}, {7, 8}};
-    vector<vector<float> > data3 = {{5, 6}, {7, 8}, {9, 10}};
+    vector<vector<double> > data1 = {{1,2}, {3, 4}};
+    vector<vector<double> > data2 = {{5, 6}, {7, 8}};
+    vector<vector<double> > data3 = {{5, 6}, {7, 8}, {9, 10}};
     
 
-    Matrix<float> A(data1);
-    Matrix<float> B(data2);
-    Matrix<float> C(data3);
+    Matrix<double> A(data1);
+    Matrix<double> B(data2);
+    Matrix<double> C(data3);
     
-    Matrix<float> S = A+B;
+    Matrix<double> S = A+B;
     for(int i = 0;i<2;i++){
         for(int j = 0;j<2;j++){
             assert(S.elements[i][j] == A.elements[i][j] + B.elements[i][j]);
         }
     }
 
-    Matrix<float> P = C*A;
+    Matrix<double> P = C*A;
     assert(P.elements[0][0] == 23);
     assert(P.elements[2][0] == 39);
     
     cout << "Mat product" << endl;
-    print_mat<float>(C*A);
+    print_mat<double>(C*A);
 
     cout << "ALL TESTS OK" << endl;
     
