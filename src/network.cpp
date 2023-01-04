@@ -75,7 +75,7 @@ void DigitNetwork::epoch(datalist data, int batch_size){
     int processed = 0;
     while(processed < data.size()) {
         int to_process = min(batch_size, ((int) data.size()) - processed);
-        if(processed % 1000 == 0)
+        if(processed % 3000 == 0)
             cout << "\tProcessed: " << ((double) processed / (double) data.size() * 100) << " % of datapoints: " << processed << endl;
         
         vector<Matrix<double> > grad;

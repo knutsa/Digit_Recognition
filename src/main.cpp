@@ -10,7 +10,7 @@ int main(){
 
     full_data_set = preprocess(full_data_set);
     DigitNetwork AI({196, 50, 50, 10}, .01);
-    cout << "Neural Network innitialized with random weights." << endl;
+    cout << "Neural Network initialized with random weights." << endl;
     cout << "Initial cost:" << endl;
     double initial_cost = AI.cost_function(full_data_set);
     cout << fixed << setprecision(5) << initial_cost << endl;
