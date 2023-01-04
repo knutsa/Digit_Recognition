@@ -18,7 +18,7 @@ public:
         weights(Matrix<double>(vector<vector<double> >(sz, vector<double>(prev_sz, 1 / size*prev_sz ))))
     {
         default_random_engine generator;
-        normal_distribution<double> distribution(.0, 1 / (double) sqrt(prev_sz));
+        normal_distribution<double> distribution(1, 1 / (double) sqrt(prev_sz));
         for(int i = 0;i<weights.h;i++){
             for(int j = 0;j<weights.w;j++){
                 weights.elements[i][j] =  distribution(generator);
@@ -32,23 +32,32 @@ class DigitNetwork{
 private:
     double learning_rate;
     vector<Layer> layers;
+    void epoch(datalist data, int batch_size = 100);
+    /*Perform one epoch*/
 public:
     /*
         Neural Network class to recognize digit images of 28 x 28 pixels.
-        Three layers 784 - 250 - 50 - 10
+        By default Three dense layers 784 - 50 - 50 - 10
     */
 
-   DigitNetwork(double learning_r = 1.0){
-     layers = { Layer(784, 250), Layer(250, 50), Layer(50, 10) };
+   DigitNetwork(vector<int> neuron_sizes = {784, 50, 50, 10}, double learning_r = .01) {
+     layers = {};
+     for (int i = 0; i < neuron_sizes.size() - 1; i++) {
+         int from = neuron_sizes[i], to = neuron_sizes[i + 1];
+         layers.push_back(Layer(from, to));
+     }
      learning_rate = learning_r;
    }
 
 
-   vector<Matrix<double> > const inline analyze(const Matrix<int> &image); //calculate neuron activations -- i.e forward propagation, number between 0 - 1 for each neuron
+   vector<Matrix<double> > const inline analyze(const Matrix<int> &image);
+   /*Calculate neuron activations -- i.e forward propagation, floating point number between 0 - 1 for each neuron */
 
-   void train(const datalist &data); //update parameters to fit training data
+   void train(const datalist &data, int epochs = 30, int batch_size = 100);
+   /*Fit network to given data*/
 
-   double cost_function(const datalist &data); // determine cost value with current parameters
+   double cost_function(const datalist &data);
+   /*Evaluatee cost function for the given data. The loss function used is L2*/
 
 };
 
@@ -60,18 +69,23 @@ vector<Matrix<double> > const DigitNetwork::analyze(const Matrix<int> &img){
             img_row.push_back((double) img.elements[i][j]);
         }
     }
-    Matrix<double> data(img_row);
+    Matrix<double> input_neurons(img_row);
+    input_neurons = input_neurons * (1 / 255); //Normalize
     vector<Matrix<double> > neuron_activations;
-    neuron_activations.push_back(data);
+    assertm(input_neurons.h == this->layers[0].weights.w, "Network Neurons sizes are mismatching the input size!!!");
+
+    neuron_activations.push_back(input_neurons);
     for(auto lr : this->layers){
-        data = lr.weights * data + lr.biases;
-        for(int i = 0;i<data.h;i++){
-            data.elements[i][0] = sigmoid(data.elements[i][0]);
+        input_neurons = lr.weights * input_neurons + lr.biases;
+        for(int i = 0;i<input_neurons.h;i++){
+            input_neurons.elements[i][0] = sigmoid(input_neurons.elements[i][0]);
         }
-        neuron_activations.push_back(data);
+        neuron_activations.push_back(input_neurons);
     }
 
     return neuron_activations;
 }
+
+void back_prop(const int label, vector<Matrix<double> >& grad,const vector<Matrix<double> >& neurons_activation, const vector<Layer>& layers);
 
 #endif

@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <stdio.h>
 
 using namespace std;
 
@@ -16,9 +17,6 @@ int reverseInt(unsigned char *a)
 datalist read_training_batch(int batch_size){
     datalist res;
     vector<Matrix<int> > imgs;
-    /*
-        Might add functionality to randomly choose subgroup of all 60000
-    */
 
     {
         //Read images
@@ -31,14 +29,17 @@ datalist read_training_batch(int batch_size){
         int num_read;
         num_read = fread(inp, 1, 4, pFile);
         int magic = reverseInt(inp);
+
         num_read = fread(inp, 1, 4, pFile);
         int num_imgs = reverseInt(inp);
+
         num_read = fread(inp, 1, 4, pFile);
         int h = reverseInt(inp);
+
         num_read = fread(inp, 1, 4, pFile);
         int w = reverseInt(inp);
 
-        assert(magic == 2051 && h == 28 && w == 28);
+        assertm(magic == 2051 && h == 28 && w == 28 && num_imgs == 60000, "Error while reading data check that all paths are correct in utils.hpp.");
 
         for(int n = 0;n<num_imgs;n++){
             unsigned char img[28][28];
@@ -52,9 +53,10 @@ datalist read_training_batch(int batch_size){
             }
             imgs.push_back(Matrix<int>(data));
         }
+        assert(imgs.size() == 60000);
         fclose(pFile);
     }
-    cout << " images read." << endl;
+
     {
         //Label images
         FILE * pFile = fopen(
@@ -68,10 +70,10 @@ datalist read_training_batch(int batch_size){
         int magic = reverseInt(inp);
         num_read = fread(inp, 1, 4, pFile);
         int num_labels = reverseInt(inp);
-        assert(num_labels == imgs.size() && magic == 2049);
+        assertm(num_labels == 60000 && magic == 2049, "Error while reading data check that paths are correct. Also in utils.hpp");
         unsigned char labels[num_labels];
         fread(labels, 1, num_labels, pFile);
-        cout << "Labels read " << endl;
+
 
         for(int n = 0;n<batch_size;n++){
             assert(labels[n] <10 && labels[n] >= 0);
@@ -79,7 +81,6 @@ datalist read_training_batch(int batch_size){
             // res.push_back(DataPoint(imgs[n], labels[n]));
         }
     }
-    cout << "Done " << "returning datalist of length " << batch_size <<endl;
 
     return res;
 }
@@ -89,7 +90,7 @@ datalist sample_data(const datalist &data, int sample_size){
     set<int> indexes_used;
 
     for(int i = 0;i<sample_size;i++){
-        int index = random() % data.size();
+        int index = i; // random() % data.size();
         while(indexes_used.find(index) != indexes_used.end()){
             index = (index+1) % data.size();
         }
@@ -162,5 +163,35 @@ datalist read_test_data(){
         }
     }
 
+    return res;
+}
+
+Matrix<int> max_pooling(Matrix<int> img, pair<int, int> pool_size = { 2,2 }) {
+    int dy = pool_size.first, dx = pool_size.second;
+    vector<vector<int> > pooled;
+    for (int y = 0; y < img.h; y+=dy) {
+        vector<int> pool_row;
+        for (int x = 0; x < img.w; x += dx) {
+            int M = INT16_MIN;
+            for (int ky = 0; ky < dy && y+ky<img.h; ky++) {
+                for (int kx = 0; kx < dx && x +kx<img.w; kx++) {
+                    M = max(M, img.elements[y + ky][x + kx]);
+                }
+            }
+            pool_row.push_back(M);
+        }
+        pooled.push_back(pool_row);
+    }
+    return Matrix<int>(pooled);
+}
+
+datalist preprocess(datalist data) {
+    /*Hard coded pooling and convolution to process images before they are passed to the neural network.*/
+    datalist res;
+    for (auto data_point : data) {
+        auto mod_img = max_pooling(data_point.first, { 2,2 });
+
+        res.push_back({ mod_img, data_point.second });
+    }
     return res;
 }
