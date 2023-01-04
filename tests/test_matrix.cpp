@@ -1,23 +1,9 @@
-#include <iostream>
-#include <vector>
-#include "../src/utils.hpp"
+#include "tests.hpp"
 
 using namespace std;
 
 
-template<typename dType>
-void print_mat(Matrix<dType> mat){
-    int h = mat.h, w = mat.w;
-    for(int i = 0;i<h;i++){
-        for(int j = 0;j<w;j++){
-            std::cout << mat.elements[i][j]<< ' ';
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-}
-
-void main_test(){
+void test_matrix(){
 
     vector<vector<double> > data1 = {{1,2}, {3, 4}};
     vector<vector<double> > data2 = {{5, 6}, {7, 8}};
@@ -40,8 +26,7 @@ void main_test(){
     assert(P.elements[2][0] == 39);
     
     cout << "Mat product" << endl;
-    print_mat<double>(C*A);
+    (C * A).print(true);
 
-    cout << "ALL TESTS OK" << endl;
     
 }
