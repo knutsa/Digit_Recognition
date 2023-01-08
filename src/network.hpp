@@ -31,7 +31,6 @@ public:
 class DigitNetwork{
 private:
     double learning_rate;
-    vector<Layer> layers;
     void epoch(datalist data, int batch_size = 100);
     /*Perform one epoch*/
 public:
@@ -39,6 +38,8 @@ public:
         Neural Network class to recognize digit images of 28 x 28 pixels.
         By default Three dense layers 784 - 50 - 50 - 10
     */
+
+    vector<Layer> layers;
 
    DigitNetwork(vector<int> neuron_sizes = {784, 50, 50, 10}, double learning_r = .01) {
      layers = {};

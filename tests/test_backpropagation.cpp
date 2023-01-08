@@ -37,7 +37,7 @@ void test_known_grad() {
 
 	Matrix<double> output_neurons = free_layer.weights * input_neurons;
 	for (int i = 0; i < output_neurons.h; i++) {
-		output_neurons.elements[i][0] = sigmoid(output_neurons[i]);
+		output_neurons.elements[i][0] = sigmoid(output_neurons(i));
 	}
 
 	vector<Matrix<double> > neurons_activation = { input_neurons, output_neurons };
