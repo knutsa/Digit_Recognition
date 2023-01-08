@@ -1,5 +1,6 @@
 #ifndef HEADER_TEST
 #define HEADER_TEST
+#include <chrono>
 #include "../src/utils.hpp"
 
 void test_matrix();

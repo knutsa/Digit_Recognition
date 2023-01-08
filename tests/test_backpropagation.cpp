@@ -11,9 +11,12 @@ void test_bp_small_cases(){
 		make_pair(Matrix<int>({10, 10}), 0),
 		make_pair(Matrix<int>({0, 30}), 1) 
 	};//, make_pair(Matrix<int>({ 20, 30 }), 5)};
-	DigitNetwork SmallAI({ 2, 4, 2 }, .01); // 2- 2
+	DigitNetwork SmallAI({ 2, 4, 2 }, .1); // 2- 2
 	SmallAI.train(data, 30);
-	
+
+	auto probs = SmallAI.analyze(data[0].first);
+	probs.print(true);
+	cout << "True value" << data[0].second << endl;
 }
 
 void test_known_grad() {
@@ -38,6 +41,7 @@ void test_known_grad() {
 	}
 
 	vector<Matrix<double> > neurons_activation = { input_neurons, output_neurons };
+	auto probs = softmax(output_neurons);
 	datalist data = { make_pair(Matrix<int>({10, 20}), 1) };
 
 	cout << "Layers' weights" << endl;
@@ -50,7 +54,7 @@ void test_known_grad() {
 	}
 	cout << "Label: " << label << endl;
 
-	back_prop(label, grad, neurons_activation, layers);
+	back_prop(label, grad, neurons_activation, layers, probs);
 
 	cout << "Gradient" << endl;
 	for (auto gd : grad) {

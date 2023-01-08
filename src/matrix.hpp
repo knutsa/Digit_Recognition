@@ -70,10 +70,6 @@ public:
 
         return Matrix<dType>(res);
     }
-    dType operator[](int index){
-        assert(w == 1);
-        return elements[index][0];
-    }
 
     Matrix<dType> operator*(const Matrix<dType> &other){
         assert(w == other.h);
@@ -117,11 +113,17 @@ public:
         return Matrix<dType>(res);
     }
 
-    dType operator[](pair<int, int> indeces){
-        int i = indeces.first, j = indeces.second;
+    dType operator()(int index) {
+        assert(w == 1);
+        return elements[index][0];
+    }
+    dType operator()(int i, int j) {
         return elements[i][j];
     }
 };
-
+template<typename dType>
+Matrix<dType> zero_matrix(int h, int w) {
+    return Matrix<dType>(vector<vector<dType> >(h, vector<dType>(w, 0)));
+}
 
 #endif
