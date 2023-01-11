@@ -41,7 +41,16 @@ public:
         }
 
         return Matrix<dType>(reshaped_data);
-        
+    }
+    /*Return the transpose of the matrix*/
+    Matrix<dType> transpose() {
+        vector<vector<dType> > new_elements(w, vector<dType>(h));
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                new_elements[j][i] = elements[i][j];
+            }
+        }
+        return Matrix<dType>(new_elements);
     }
 
     void print(bool print_all = false){
@@ -122,8 +131,30 @@ public:
     }
 };
 template<typename dType>
-Matrix<dType> zero_matrix(int h, int w) {
+Matrix<dType> zero_matrix(size_t h, size_t w) {
     return Matrix<dType>(vector<vector<dType> >(h, vector<dType>(w, 0)));
 }
 
+/*Float or double matrix with elements taken from a uniform random distribution.*/
+template<typename dType>
+Matrix<dType> random_matrix(size_t h, size_t w, dType lower_b = 0.0, dType upper_b = 1.0){
+    default_random_engine rg(time(0));
+    uniform_real_distribution<dType> dice(lower_b, upper_b);
+    vector<vector<dType> > elements(h, vector<dType>(w));
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            elements[i][j] = dice(rg);
+        }
+    }
+    return Matrix<dType>(elements);
+}
+inline Matrix<int> randint_matrix(size_t h, size_t w, int upper = 256) {
+    vector<vector<int> > elements(h, vector<int>(w));
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            elements[i][j] = rand() % upper;
+        }
+    }
+    return Matrix<int>(elements);
+}
 #endif

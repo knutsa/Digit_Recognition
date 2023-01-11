@@ -25,8 +25,11 @@ double matrix_mean(const Matrix<double>& A) {
 void DigitNetwork::train(const datalist& data, int epochs, int batch_size) {
     cout << "Training AI for " << epochs << " epochs with a batch size of " << batch_size << " and learning_rate = " << this->learning_rate << endl;
     for (int epoch = 0; epoch < epochs; epoch++) {
+        auto start = chrono::high_resolution_clock::now();
         this->epoch(data, batch_size);
-        cout << (epoch+1) << " epochs performed. Cost now is:" << endl;
+        auto finished = chrono::high_resolution_clock::now();
+        double time = chrono::duration_cast<chrono::nanoseconds>(finished - start).count() * 1e-9;
+        cout << (epoch+1) << ":th epoch performed. (" << time << "s)" << ". Cost now is : " << endl;
         auto performance = this->cost_function(data);
         cout << fixed << setprecision(10) << performance.first << " accuracy: " << performance.second << " %" << endl;
 #ifdef DISPLAY
@@ -47,14 +50,6 @@ void DigitNetwork::train(const datalist& data, int epochs, int batch_size) {
 #endif // DISPLAY
 
     }
-#ifdef DEBUG
-    for (auto layer : this->layers) {
-        cout << "Layer weights" << endl;
-        layer.weights.print();
-        cout << "Layer biases" << endl;
-        layer.biases.print();
-    }
-#endif // DEBUG
 
 }
 
@@ -71,38 +66,20 @@ void DigitNetwork::epoch(datalist data, int batch_size){
         vector<Matrix<double> > grad;
         for(auto layer : this->layers){ grad.push_back(Matrix<double>(vector<vector<double> >(layer.weights.h, vector<double>(layer.weights.w+1)))); }
 
-        for (int data_index = processed; data_index < processed+to_process;data_index++){
-
+#pragma omp parallel for
+        for(int i = 0;i<to_process;++i){
+            int data_index = processed + i;
             const int label = data[data_index].second;
-            const Matrix<int> img = data[data_index].first;
+            const auto img = data[data_index].first;
             vector<Matrix<double> > neurons_activation = this->forward_prop(img);
             auto probs = softmax(*(neurons_activation.end() - 1));
-#ifdef DEBUG
-            cout << "From epoch neurons activation is" << endl;
-            for (auto nr : neurons_activation) {
-                nr.print(true);
-            }
-#endif // DEBUG
         
             back_prop(label, grad, neurons_activation, this->layers, probs );
         } 
 
         for(int l_ind = 0;l_ind < grad.size(); l_ind++){
             grad[l_ind] = grad[l_ind] * (1 / (double) to_process);
-#ifdef DEBUG
-            for (int l_ind = 0; l_ind < grad.size(); l_ind++) {
-                cout << "Learning rate is " << this->learning_rate << " and after recent backprop " << to_process << " datapoints this is the gradiend with respect to the weights of layer: " << l_ind << endl;
-                grad[l_ind].print(true);
-            }
-#endif // DEBUG
 
-#ifdef DEBUG
-            cout << "Layer " << l_ind << " before GD : " << endl;
-            cout << "Weights" << endl;
-            this->layers[0].weights.print(true);
-            cout << "Biases" << endl;
-            this->layers[0].biases.print(true);
-#endif // DEBUG
             for(int i = 0;i<grad[l_ind].h;i++){
                 for(int j = 0;j<grad[l_ind].w-1;j++){
                     this->layers[l_ind].weights.elements[i][j] -= this->learning_rate * grad[l_ind].elements[i][j];
@@ -111,7 +88,7 @@ void DigitNetwork::epoch(datalist data, int batch_size){
             }
         }
 
-        if (processed % 300 == 0)
+        if (processed % 1000 == 0)
             cout << "\tProcessed: " << ((double)processed / (double)data.size() * 100) << " % of datapoints: " << processed << " grad[0] norm is: " << norm_square(grad[0]) << endl;
         processed += to_process;
     }
@@ -121,9 +98,10 @@ void DigitNetwork::epoch(datalist data, int batch_size){
 pair<double, double> DigitNetwork::cost_function(const datalist &data){
     long double cost = 0;
     int correct = 0, total = 0;
-    for(auto it : data){
-        const int label = it.second;
-        Matrix<int> &img = it.first;
+#pragma omp parallel for
+    for (int data_index = 0;data_index<data.size();data_index++) {
+        const int label = data[data_index].second;
+        auto& img = data[data_index].first;
         auto probs = this->analyze(img);
         int num_categories = probs.h; // number of output neurons from Network
         assert(label >= 0 && label < num_categories);

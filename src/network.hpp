@@ -139,7 +139,7 @@ inline void back_prop(const int label, vector<Matrix<double> >& grad, const vect
         const Layer& current_layer = layers[layer_index];
         assert(mat.h == current_layer.weights.h && mat.w == current_layer.weights.w + 1);
         assert(mat.h == calced.size());
-        vector<double> new_calced(mat.w - 1);
+        vector<double> new_calced(mat.w - 1, 0);
 
         for (int i = 0; i < mat.h; i++) {
             for (int j = 0; j < mat.w; j++) { //last one is the bias

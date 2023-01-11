@@ -10,6 +10,8 @@
 #include <iostream>
 #include <iomanip>
 #include <random>
+#include <omp.h>
+#include <chrono>
 
 using namespace std;
  
