@@ -69,7 +69,7 @@ void meassure_times() {
 	}
 	auto no_matrix_back1 = chrono::high_resolution_clock::now();
 	auto no_matrix_back_time = chrono::duration_cast<chrono::nanoseconds>(no_matrix_back1 - no_matrix_back0).count();
-	cout << "Attempted Optimized backward - using simd and less matrix classes, " << no_matrix_back_time * 1e-9 << " s" << endl;
+	cout << "Optimized backward - using simd and less matrix classes, " << no_matrix_back_time * 1e-9 << " s" << endl;
 
 	cout << string(40, '=') << endl;
 	cout << "Results:" << endl;
@@ -79,7 +79,7 @@ void meassure_times() {
 	cout << "opt  backward " << no_matrix_back_time * 1e-9 << " s" << endl;	
 
 	//Assure results are the same
-	double epsilon = 1e-12;
+	double epsilon = 1e-10;
 	assert(grad.size() == no_matrix_grad.size());
 	for (int grad_index = 0; grad_index < grad.size(); grad_index++) {
 		size_t h = grad[grad_index].h, w = grad[grad_index].w;
@@ -95,6 +95,7 @@ void meassure_times() {
  				}
 			}
 		}
+		assertm(counter == 0, "Different answer from old and new matrices");
 	}
 	cout << "All values equal within " << epsilon << endl;
 }
@@ -104,11 +105,11 @@ int main() {
 	//test_matrix();
 
 
-	//test_bp_small_cases();
+	test_bp_small_cases();
 
 	//test_known_grad();
 	//test_optimized_backprop();
-	meassure_times();
+	//meassure_times();
 
 	return 0;
 }

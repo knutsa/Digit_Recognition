@@ -3,7 +3,7 @@
 
 #include "utils.hpp"
 
-#define sigmoid(x) 1 / (1 + exp(-x))
+#define sigmoid(x) 1 / (1 + exp(-x)) - 0.5
 #define sigmoid_derivative(x) 1 / ( (exp(x/2) + exp(-x/2)) *(exp(x/2)+exp(-x/2)) )
 
 class Layer {
@@ -41,7 +41,13 @@ public:
 
     vector<Layer> layers;
 
-   DigitNetwork(vector<int> neuron_sizes = {784, 50, 50, 10}, double learning_r = .01) {
+    /*
+        :param neuron_sizes -- network dimensions
+        :param learning_r -- learning_rate, constant for all weights and epochs
+        :param loss -- either of 'L2' for mean square or 'CGE' for cross categorical entropy
+    */
+   DigitNetwork(vector<int> neuron_sizes = {784, 50, 50, 10}, double learning_r = .01, string loss = "L2") {
+     assertm(loss == "L2" || loss == "CGE", "Loss must be any of 'L2' or 'CGE' - cross categorical entropy")
      layers = {};
      for (int i = 0; i < neuron_sizes.size() - 1; i++) {
          int from = neuron_sizes[i], to = neuron_sizes[i + 1];

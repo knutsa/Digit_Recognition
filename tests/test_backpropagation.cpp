@@ -2,25 +2,30 @@
 #include "tests.hpp"
 
 
-void test_bp_small_cases(){
-	/*The value of the cost function is not reducing over time!!!?! */
+void test_bp_small_cases() {
 	datalist data = {
 		make_pair(Matrix<int>({10, 20}), 1),
 		make_pair(Matrix<int>({30, 10}), 0),
 		make_pair(Matrix<int>({20, 20}), 1),
 		make_pair(Matrix<int>({10, 10}), 0),
-		make_pair(Matrix<int>({0, 30}), 1) 
-	};//, make_pair(Matrix<int>({ 20, 30 }), 5)};
-	DigitNetwork SmallAI({ 2, 4, 2 }, .1); // 2- 2
-	SmallAI.train(data, 30);
+		make_pair(Matrix<int>({0, 30}), 1)
+	};
+	cout << "Testing AI running on a small basic data set. Make sure the cost function is decreasing over time!!" << endl;
+	DigitNetwork SmallAI({ 2, 4, 2 }, .01); // 2 - 4 - 2
+	SmallAI.train(data, 300);
 
+	auto neurons_activation = SmallAI.forward_prop(data[0].first);
 	auto probs = SmallAI.analyze(data[0].first);
-	probs.print(true);
-	cout << "True value" << data[0].second << endl;
+	cout << "Test AI trained, the output from the first data point: " << endl;
+	cout << "\t neurons activation, layers are horizontal: " << endl;
+	print_vecvec(neurons_activation);
+	cout << "\t output pprobabilities: " << endl;
+	print_vecvec({probs});
+	cout << "the True value is" << data[0].second << endl;
 }
 
+/*Two simple cases tested manually with old back_prop. Everything appears correct!!! Could verify this using tensorflow.*/
 void test_known_grad() {
-	/*Two simple cases tested. Everything appears correct!?!!! Could verify this using tensorflow.*/
 	
 	Matrix<double> input_neurons({ 1, 2 });
 	Matrix<double> weights({ {2, 1}, {3, 7} });
@@ -41,7 +46,8 @@ void test_known_grad() {
 	}
 
 	vector<Matrix<double> > neurons_activation = { input_neurons, output_neurons };
-	auto probs = softmax(output_neurons);
+	auto probs = softmax(output_neurons.transpose().elements[0]);
+	Matrix<double> matrix_probs(probs);
 	datalist data = { make_pair(Matrix<int>({10, 20}), 1) };
 
 	cout << "Layers' weights" << endl;
@@ -54,7 +60,7 @@ void test_known_grad() {
 	}
 	cout << "Label: " << label << endl;
 
-	back_prop(label, grad, neurons_activation, layers, probs);
+	back_prop_old_with_matrices(label, grad, neurons_activation, layers, matrix_probs);
 
 	cout << "Gradient" << endl;
 	for (auto gd : grad) {

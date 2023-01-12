@@ -25,8 +25,7 @@ void test_matrix(){
     assert(P.elements[0][0] == 23);
     assert(P.elements[2][0] == 39);
     
-    cout << "Mat product" << endl;
-    (C * A).print(true);
+    cout << "Matrix test OK!" << endl;
 
     
 }
