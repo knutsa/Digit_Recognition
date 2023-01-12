@@ -50,11 +50,10 @@ public:
      learning_rate = learning_r;
    }
 
-
-   vector<Matrix<double> > inline forward_prop(const Matrix<int> &image);
    /*Calculate neuron activations -- i.e forward propagation, floating point number between 0 - 1 for each neuron */
+   vector<vector<double> > inline forward_prop(const Matrix<int> &image);
 
-   Matrix<double> inline analyze(const Matrix<int>& img);
+   vector<double> inline analyze(const Matrix<int>& img);
 
    void train(const datalist &data, int epochs = 30, int batch_size = 100);
    /*Fit network to given data*/
@@ -69,7 +68,7 @@ public:
 };
 
 //inline methods
-vector<Matrix<double> > inline DigitNetwork::forward_prop(const Matrix<int> &img){
+vector<vector<double> > inline DigitNetwork::forward_prop(const Matrix<int> &img){
     vector<double> img_row;
     for(int i = 0;i<img.h;i++){
         for(int j = 0;j<img.w;j++){
@@ -77,80 +76,97 @@ vector<Matrix<double> > inline DigitNetwork::forward_prop(const Matrix<int> &img
         }
     }
     Matrix<double> input_neurons(img_row);
-    input_neurons = input_neurons * (1 / 255); //Normalize
-    vector<Matrix<double> > neuron_activations;
+    input_neurons = input_neurons * (1 / 255.0); //Normalize
+    vector<vector<double> > neuron_activations;
     assertm(input_neurons.h == this->layers[0].weights.w, "Network Neurons sizes are mismatching the input size!!!");
 
-    neuron_activations.push_back(input_neurons);
+    neuron_activations.push_back(input_neurons.transpose().elements[0]);
     for(auto lr : this->layers){
         input_neurons = lr.weights * input_neurons + lr.biases;
+        vector<double> neuron_activation(input_neurons.h);
         for(int i = 0;i<input_neurons.h;i++){
-            input_neurons.elements[i][0] = sigmoid(input_neurons.elements[i][0]);
+            double yi = sigmoid(input_neurons(i));
+            neuron_activation[i] = input_neurons.elements[i][0] = yi;
         }
-        neuron_activations.push_back(input_neurons);
+        neuron_activations.push_back(neuron_activation);
     }
-
     return neuron_activations;
 }
 
-Matrix<double> inline softmax(Matrix<double>& output_neurons) {
-    Matrix<double> soft_maxed(vector<double>(output_neurons.h, 0));
-    double sum = 0;
-    for (int i = 0; i < output_neurons.h; i++) {
-        auto yi = exp(output_neurons.elements[i][0]);
-        soft_maxed.elements[i][0] = yi;
+vector<double> inline softmax(const vector<double>& output_neurons) {
+    vector<double> soft_maxed(output_neurons.size(), 0);
+    double sum = 0.0;
+    for (int i = 0; i < output_neurons.size(); i++) {
+        auto yi = exp(output_neurons[i]);
+        soft_maxed[i] = yi;
         sum += yi;
     }
-    soft_maxed = soft_maxed * (1 / sum);
+    for (int i = 0; i < soft_maxed.size(); i++){ soft_maxed[i] /= sum; }
 
     return soft_maxed;
 }
 
-Matrix<double> DigitNetwork::analyze(const Matrix<int>& img) {
+vector<double> DigitNetwork::analyze(const Matrix<int>& img) {
     auto neurons_activation = this->forward_prop(img);
-    auto output_neurons = *(neurons_activation.end() - 1);
+    auto &output_neurons = *(neurons_activation.end() - 1);
     //Run logits through softmax
 
     auto soft_maxed = softmax(output_neurons);
     return soft_maxed;    
 }
 
-inline void back_prop(const int label, vector<Matrix<double> >& grad, const vector<Matrix<double> >& neurons_activation, const vector<Layer>& layers, const Matrix<double> output_probabilities) {
-    /*Adds contribution of img to grad from img. Grad is a Matrix of the format [weight matrix | biases column]*/
+/*Add to_add to the doubles stored at p (simd version of +=)*/
+inline void vecadd_pd(double* p, __m256d to_add) {
+    __m256d loaded = _mm256_loadu_pd(p);
+    __m256d updated = _mm256_add_pd(loaded, to_add);
+    _mm256_storeu_pd(p, updated);
+}
+
+//This function is the bottleneck of the algorithm, it has been modified to run a little faster
+/*Adds contribution of img to grad from img. Grad is a Matrix of the format [weight matrix | biases column], minimizing use of matrices to try and reduce computation time.*/
+inline void back_prop(const int label, vector<vector<vector<double> > >& grad, const vector<vector<double> >& neurons_activation, const vector<Layer>& layers, const vector<double> output_probabilities) {
     assert(neurons_activation.size() == grad.size() + 1); //one layer between each group of neurons
     const auto& output_neurons = *(neurons_activation.end() - 1);
-    assert(output_probabilities.h == output_neurons.h);
-    vector<double> calced(output_probabilities.h, 0); //Derivative with respect to output neurons
+    assert(output_probabilities.size() == output_neurons.size());
+    vector<double> calced(output_probabilities.size(), 0); //Derivative with respect to output neurons
 
     //Derivative of cost function with respect to output neurons -- using cross categorical entropy loss
-    double sum = 0, xlabel = output_neurons.elements[label][0];
+    double sum = 0, xlabel = output_neurons[label];
     for (int i = 0; i < calced.size(); i++) {
-        double xi = output_neurons.elements[i][0];
+        double xi = output_neurons[i];
         sum += exp(xi);
     }
     for (int i = 0; i < calced.size(); i++) {
-        double xi = output_neurons.elements[i][0];
+        double xi = output_neurons[i];
         calced[i] = exp(xi) / sum;
     }
     calced[label] = exp(xlabel) / sum - 1;
 
     for (int layer_index = grad.size() - 1; layer_index >= 0; layer_index--) { //process layer of weights in reverse order
-        Matrix<double>& mat = grad[layer_index];
+        vector<vector<double> >& mat = grad[layer_index];
         const Layer& current_layer = layers[layer_index];
-        assert(mat.h == current_layer.weights.h && mat.w == current_layer.weights.w + 1);
-        assert(mat.h == calced.size());
-        vector<double> new_calced(mat.w - 1, 0);
+        assert(mat.size() == current_layer.weights.h && mat[0].size() == current_layer.weights.w + 1);
+        assert(mat.size() == calced.size());
+        int h = mat.size(), w = mat[0].size();
+        vector<double> new_calced(w - 1, 0.0);
 
-        for (int i = 0; i < mat.h; i++) {
-            for (int j = 0; j < mat.w; j++) { //last one is the bias
-                if (j == mat.w - 1) {
-                    mat.elements[i][j] += sigmoid_derivative(calced[i]); //derivative with respect to bias
-                }
-                else {
-                    mat.elements[i][j] += neurons_activation[layer_index].elements[j][0] * sigmoid_derivative(calced[i]); //Derivative with respect to weight
-                    new_calced[j] += current_layer.weights.elements[i][j] * sigmoid_derivative(calced[i]); //Derivative with respect to neuron value --- only used to propagate backwards
-                }
+        //Worsed case try to use SIMD here ??? --- ooh yessir :)
+        for (int i = 0; i < h; i++) {
+            size_t alignedJ = (w - 1) - ((w - 1) % 4);
+            const double sig_der_calced = sigmoid_derivative(calced[i]);
+            __m256d sig_der_vec = _mm256_set_pd(sig_der_calced, sig_der_calced, sig_der_calced, sig_der_calced);
+            for (int j = 0; j < alignedJ; j += 4) {
+                __m256d neuronsvec = _mm256_loadu_pd(&neurons_activation[layer_index][j]);
+                __m256d weightsvec = _mm256_loadu_pd(&current_layer.weights.elements[i][j]);
+
+                vecadd_pd(&mat[i][j], _mm256_mul_pd(neuronsvec, sig_der_vec));
+                vecadd_pd(&new_calced[j], _mm256_mul_pd(weightsvec, sig_der_vec));
             }
+            for (int j = alignedJ; j < w - 1; j++) { //last one is the bias -- original loop
+                mat[i][j] += neurons_activation[layer_index][j] * sig_der_calced; //Derivative with respect to weight
+                new_calced[j] += current_layer.weights.elements[i][j] * sig_der_calced; //Derivative with respect to neuron value --- only used to propagate backwards
+            }
+            mat[i][w - 1] += sig_der_calced; //derivative with respect to bias
         }
         calced = new_calced;
     }

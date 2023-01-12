@@ -1,9 +1,8 @@
 #include "tests.hpp"
-#include <omp.h>
 #include <string>
 
 void meassure_times() {
-	const int num_imgs = 100;
+	const int num_imgs = 1000;
 	cout << "Measuring time, using " << num_imgs << " images" << endl;
 	DigitNetwork AI({ 784, 50, 50, 10 }, .01);
 	vector<Matrix<double> > neurons_activation = { random_matrix<double>(784,1), random_matrix<double>(50, 1), random_matrix<double>(50, 1), random_matrix<double>(10,1) };
@@ -48,26 +47,24 @@ void meassure_times() {
 	auto back0 = chrono::high_resolution_clock::now();
 	{
 		size_t processed = 0;
-//#pragma omp parallel for
 		for (unsigned int data_index = 0;data_index<data.size();data_index++) {
 			auto img = data[data_index].first;
 			int label = data[data_index].second;
-			back_prop(label, grad, neurons_activation, AI.layers, probs);
+			back_prop_old_with_matrices(label, grad, neurons_activation, AI.layers, probs);
 			//back_prop_no_matrices(label, no_matrix_grad, no_matrix_neurons_activation, AI.layers, no_matrix_prob);
 		}
 	}
 	auto back1 = chrono::high_resolution_clock::now();
 	auto back_time = chrono::duration_cast<chrono::nanoseconds>(back1 - back0).count();
-	cout << "Done backward with omp " << back_time * 1e-9 << " s" << endl;
+	cout << "Done backward old, " << back_time * 1e-9 << " s" << endl;
 	
 	auto no_matrix_back0 = chrono::high_resolution_clock::now();
 	{
 		size_t processed = 0;
-//#pragma omp parallel for
 		for (unsigned int data_index = 0;data_index<data.size();data_index++) {
 			auto img = data[data_index].first;
 			int label = data[data_index].second;
-			back_prop_no_matrices_simded(label, no_matrix_grad, no_matrix_neurons_activation, AI.layers, no_matrix_prob);
+			back_prop(label, no_matrix_grad, no_matrix_neurons_activation, AI.layers, no_matrix_prob);
 		}
 	}
 	auto no_matrix_back1 = chrono::high_resolution_clock::now();

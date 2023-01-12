@@ -157,4 +157,12 @@ inline Matrix<int> randint_matrix(size_t h, size_t w, int upper = 256) {
     }
     return Matrix<int>(elements);
 }
+inline void print_vecvec(vector<vector<double> > m) {
+    for (int i = 0; i < m.size(); i++) {
+        for (int j = 0; j < m[i].size(); j++) {
+            cout << m[i][j] << ", ";
+        }
+        cout << endl;
+    }
+}
 #endif
