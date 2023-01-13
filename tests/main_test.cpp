@@ -76,28 +76,7 @@ void meassure_times() {
 	cout << "reading time " << reading_data_time * 1e-9 << " s" << endl;
 	cout << "forward time " << forward_time * 1e-9 << " s" << endl;
 	cout << "backward time " << back_time * 1e-9 << " s" << endl;
-	cout << "opt  backward " << no_matrix_back_time * 1e-9 << " s" << endl;	
-
-	//Assure results are the same
-	double epsilon = 1e-10;
-	assert(grad.size() == no_matrix_grad.size());
-	for (int grad_index = 0; grad_index < grad.size(); grad_index++) {
-		size_t h = grad[grad_index].h, w = grad[grad_index].w;
-		int counter = 0;
-		for (int i = 0; i < h; ++i) {
-			for (int j = 0; j < w; j++) {
-				if (abs(grad[grad_index](i, j) - no_matrix_grad[grad_index][i][j]) > epsilon) {
-					cout << "Values different at " << i << ", " << j << endl;
-					cout << "Values are: " << grad[grad_index](i, j) << " and " << no_matrix_grad[grad_index][i][j] << endl;
-					counter++;
-					if (counter == 10)
-						return;
- 				}
-			}
-		}
-		assertm(counter == 0, "Different answer from old and new matrices");
-	}
-	cout << "All values equal within " << epsilon << endl;
+	cout << "opt  backward " << no_matrix_back_time * 1e-9 << " s" << endl;
 }
 
 

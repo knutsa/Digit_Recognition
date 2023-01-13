@@ -5,11 +5,11 @@ using namespace std;
 int main(){
 
     cout << "Reading data" << endl;
-    datalist full_data_set = read_training_batch(10000);
+    datalist full_data_set = read_training_batch();
     cout << "Done reading " << full_data_set.size() << " images" << endl;
 
     //full_data_set = preprocess(full_data_set);
-    DigitNetwork AI({784, 50, 50, 10}, .01);
+    DigitNetwork AI({784, 50, 50, 10}, .03);
     cout << "Neural Network initialized with random weights. Network size is 784 x 50 x 50 x 10" << endl;
     cout << "Initial cost:" << endl;
     auto res = AI.cost_function(full_data_set);
