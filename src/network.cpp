@@ -53,6 +53,7 @@ void DigitNetwork::train(datalist data, int epochs, int batch_size) {
 void DigitNetwork::epoch(const datalist &data, int batch_size){
     int processed = 0;
 
+    cout << "\tProcessed: 0%, ";
     while(processed < data.size()) {
         int to_process = min(batch_size, ((int) data.size()) - processed);
         vector<vector<vector<double> > > grad;
@@ -95,9 +96,9 @@ void DigitNetwork::epoch(const datalist &data, int batch_size){
             }
         }
 
-        if (processed % 10000 == 0)
-            cout << ((double)processed / (double)data.size() * 100) << " % processed ( " << processed << " ), "; // grad[0] norm is : " << norm_square(grad[0]) << endl;
         processed += to_process;
+        if (processed % 10000 == 0)
+            cout << ((double)processed / (double)data.size() * 100) << "%, "; // grad[0] norm is : " << norm_square(grad[0]) << endl;
     }
     cout << endl;
 }

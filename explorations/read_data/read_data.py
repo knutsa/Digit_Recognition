@@ -15,7 +15,7 @@ def read_img(file: BufferedReader, h, w):
 
 def main():
     
-    path = os.path.join(os.path.dirname(__file__), "../../data/train-images-idx3-ubyte")
+    path = os.path.join(os.path.dirname(__file__), "../../data/t10k-images-idx3-ubyte")
     with open(path, "rb") as file:
         magic = file.read(4)
         print(magic, type(magic), len(magic), magic[1], magic[2], magic[3], type(magic[1]))
@@ -30,7 +30,7 @@ def main():
         w = file.read(4)
         w = reverseBytes2Int(w)
         
-        print(magic)
+        print("magic int", magic)
         print(f"Data is of size {num_imgs} x {h} x {w}")
         
         digits = [5, 0, 4]
@@ -46,7 +46,7 @@ def main():
     
     print("digits ", digits)
     
-    path = os.path.join(os.path.dirname(__file__), "../../data/train-labels-idx1-ubyte")
+    path = os.path.join(os.path.dirname(__file__), "../../data/t10k-labels-idx1-ubyte")
     with open(path, "rb") as file:
         label_magic = file.read(4)
         label_magic = reverseBytes2Int(label_magic)
@@ -54,7 +54,7 @@ def main():
         num_labels = file.read(4)
         num_labels = reverseBytes2Int(num_labels)
         print("Label data: ")
-        print(label_magic, ' ', num_labels)
+        print("labek magic", label_magic, ' number of labels ', num_labels)
         
         for l in range(3):
             

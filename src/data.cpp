@@ -78,8 +78,8 @@ datalist read_training_batch(int batch_size){
         for(int n = 0;n<batch_size;n++){
             assert(labels[n] <10 && labels[n] >= 0);
             res.push_back(pair<Matrix<int>, int>(imgs[n], (int) labels[n]));
-            // res.push_back(DataPoint(imgs[n], labels[n]));
         }
+        fclose(pFile);
     }
 
     return res;
@@ -124,15 +124,17 @@ datalist read_test_data(){
         num_read = fread(inp, 1, 4, pFile);
         int w = reverseInt(inp);
 
-        assert(magic == 2051 && h == 28 && w == 28);
+        assert(magic == 2051 && h == 28 && w == 28 && num_imgs == 10000);
 
         for(int n = 0;n<num_imgs;n++){
-            unsigned int img[28][28];
+            unsigned char img[28][28];
             fread(img, 28, 28, pFile);
             vector<vector<int> > data(28, vector<int>(28));
             for(int i = 0;i<28;i++){
                 for(int j = 0;j<28;j++){
                     data[i][j] = (int) img[i][j];
+                    if (data[i][j] < 0 || data[i][j] >= 256)
+                        cout << "Weirdo here " << data[i][j] << endl;
                     assert(data[i][j] >= 0 && data[i][j] < 256);
                 }
             }
@@ -153,14 +155,16 @@ datalist read_test_data(){
         int magic = reverseInt(inp);
         num_read = fread(inp, 1, 4, pFile);
         int num_labels = reverseInt(inp);
-        assert(num_labels == imgs.size() && magic == 2048);
+        assert(num_labels == 10000 && magic == 2049);
+
         unsigned char labels[num_labels];
         fread(labels, 1, num_labels, pFile);
 
         for(int n = 0;n<num_labels;n++){
+            assert(labels[n] >= 0 && labels[n] < 10);
             res.push_back(pair<Matrix<int>, int>(imgs[n], (int) labels[n]));
-            // res.push_back(DataPoint(imgs[n], labels[n]));
         }
+        fclose(pFile);
     }
 
     return res;

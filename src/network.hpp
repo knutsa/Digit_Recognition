@@ -84,6 +84,10 @@ public:
            return "CROSS_CATEGORICAL_ENTROPY";
        return "!!invalid loss!!!";
    }
+   /*Multiply learning rate by scale*/
+   void scale_learning(double scale = .5) {
+       this->learning_rate = this->learning_rate * scale;
+   }
 
 };
 
