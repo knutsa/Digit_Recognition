@@ -9,8 +9,9 @@ int main(){
     cout << "Done reading " << full_data_set.size() << " images" << endl;
 
     //full_data_set = preprocess(full_data_set);
-    DigitNetwork AI({784, 60, 60, 10}, 2.0);
-    cout << "Neural Network initialized with random weights. Network size is 784 x 50 x 50 x 10" << endl;
+    int hidden1 = 60, hidden2 = 60;
+    DigitNetwork AI({784, hidden1, hidden2, 10}, 2.0);
+    cout << "Neural Network initialized with random weights. Network size is 784 x " << hidden1 << " x " <<  hidden2 << " x 10" << endl;
     cout << "Initial cost: ";
     auto res = AI.cost_function(full_data_set);
     double initial_cost = res.first, initial_accuracy = res.second;
