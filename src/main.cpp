@@ -9,27 +9,22 @@ int main(){
     cout << "Done reading " << full_data_set.size() << " images" << endl;
 
     //full_data_set = preprocess(full_data_set);
-    DigitNetwork AI({784, 50, 50, 10}, 1.0);
+    DigitNetwork AI({784, 60, 60, 10}, 2.0);
     cout << "Neural Network initialized with random weights. Network size is 784 x 50 x 50 x 10" << endl;
-    cout << "Initial cost:" << endl;
+    cout << "Initial cost: ";
     auto res = AI.cost_function(full_data_set);
     double initial_cost = res.first, initial_accuracy = res.second;
     cout << fixed << setprecision(10) << initial_cost << " initial accuracy: " << initial_accuracy << "%" << endl;
   
     //Training
-    AI.train(full_data_set, 30, 100);
+    AI.train(full_data_set, 15, 100);
+    AI.scale_learning(.75);
+    AI.train(full_data_set, 15, 100);
+    AI.scale_learning(0.75);
+    AI.train(full_data_set, 20, 100);
 
     cout << "AI is trained." << endl;
 
-    for(int i = 0;i<5;i++){
-        auto &img = full_data_set[i].first;
-        int label = full_data_set[i].second;
-        cout << "Predictions for image nr " << i << " (true value is " << label << ")" << endl;
-        auto res = AI.analyze(img);
-        for (int k = 0; k < 10; k++) {
-            cout << k << ": " << res[k] << endl;
-        }
-    }
     cout << string(40, '=') << endl;
     cout << "Performance summary: " << endl;
 

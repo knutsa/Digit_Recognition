@@ -2,7 +2,7 @@
 #define HEADER_UTILS
 
 //#define DEBUG //Comment when not debugging :) !!
-#define DISPLAY
+//#define DISPLAY
 
 #include <cassert>
 #include <vector>

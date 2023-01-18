@@ -35,18 +35,6 @@ void DigitNetwork::train(datalist data, int epochs, int batch_size) {
         cout << (epoch+1) << ":th epoch performed. (" << time << "s)" << ". Cost now is : " << endl;
         auto performance = this->cost_function(data);
         cout << fixed << setprecision(10) << performance.first << " accuracy: " << performance.second << " %" << endl;
-#ifdef DISPLAY
-        if (epoch % 5 == 0) {
-            for (int i = 0; i < 1; i++) {
-                auto neurons_activation = this->forward_prop(data[i].first);
-                auto probs = this->analyze(data[i].first);
-                cout << "Output neurons from image " << i << ". True value is " << data[i].second << endl;
-                print_vecvec({ *(neurons_activation.end() - 1) });
-                cout << "Output probability from image " << i << endl;
-                print_vecvec({ probs });
-            }
-        }
-#endif // DISPLAY
     }
 }
 
