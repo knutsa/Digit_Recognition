@@ -19,7 +19,7 @@ int main(){
 
     unsigned char a[4];
     int num_read;
-    fread(a, 1, 4, pFile);
+    num_read = fread(a, 1, 4, pFile);
     const int magic = reverseInt(a);
 
     cout << magic << endl;
@@ -32,6 +32,7 @@ int main(){
     fread(a, 1, 4, pFile);
     const int num_cols = reverseInt(a);
 
+    cout << num_read << endl;
     cout << "Data is of dim: " << num_imgs << " x " << num_rows << " x " << num_cols << endl;
 
     vector<Matrix<int> > imgs;
