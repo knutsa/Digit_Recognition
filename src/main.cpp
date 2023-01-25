@@ -1,8 +1,9 @@
 #include "utils.hpp"
+#include "network.hpp"
 
 using namespace std;
 
-int main(){
+void make_model(){
 
     cout << "Reading data" << endl;
     datalist full_data_set = read_training_batch();
@@ -37,4 +38,66 @@ int main(){
     datalist test_data = read_test_data();
     auto test_res = AI.cost_function(test_data);
     cout << "Test cost is: " << test_res.first << " and test accuracy is: " << test_res.second << "%" << endl;
+
+    cout << "If you would like to save this model type in a name for the file in which to store it. (Empty to not save, and 's' for saved_model)" << endl;
+    string fn;
+    cin >> fn;
+    if (fn.size()) {
+        if (fn == "s")
+            fn = "saved_model";
+        store_model(AI, test_res.first, test_res.second, fn);
+    }
+}
+
+void run_saved_model() {
+    DigitNetwork AI;
+    string fn;
+
+    cout << "Enter filename (without extension) where the model is stored, 's' for 'saved_model'" << endl;
+    cin >> fn;
+    while (true) {
+        if (fn == "s")
+            fn = "saved_model";
+        try {
+            AI = load_model(fn);
+            break;
+        }
+        catch (const exception& e) {
+            cout << "Couldn't read from '" << fn << "' try again with a different name" << endl;
+        }
+        cin >> fn;
+    }
+    cout << "AI loaded " << endl;
+    
+    auto testdata = read_test_data();
+    auto stats = AI.cost_function(testdata);
+
+    cout << "Test cost: " << stats.first << " accuracy: " << stats.second << "%" << endl;
+}
+
+int main() {
+    cout << "Would you like to (1) train a new Nework, or (2) run a previously saved Network?" << endl;
+    string user_input;
+    while (true) {
+        cin >> user_input;
+        if (user_input == "1" || user_input == "2")
+            break;
+        cout << "Invalid option enter '1' or '2'" << endl;
+    }
+    if (user_input == "1") {
+        int crashes = 0;
+        while (true) {
+            try {
+                make_model();
+                break;
+            }
+            catch (const exception& e) {
+                cout << "Crashed " << crashes << " times" << endl;
+                cout << e.what() << endl;
+            }
+        }
+    }
+    else {
+        run_saved_model();
+    }
 }

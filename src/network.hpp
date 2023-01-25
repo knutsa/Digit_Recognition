@@ -12,21 +12,34 @@
 
 class Layer {
 public:
-    int size;
     Matrix<double> biases; //biases used to transform to itself
     Matrix<double> weights; //weights used to transform from previous layer to itself
 
-    Layer(int prev_sz, int sz) : 
-        size(sz),
-        biases(Matrix<double>(vector<double>(sz, .0))),
-        weights(Matrix<double>(vector<vector<double> >(sz, vector<double>(prev_sz))))
+    Layer(int prev_sz, int sz) :
+        biases(Matrix<double>(vector<double>(sz, .0)))
     {
+        weights = Matrix<double>(vector<vector<double> >(sz, vector<double>(prev_sz)));
+
         default_random_engine generator(time(0));
         normal_distribution<double> distribution(0, 1); //This part is probably quite important. Initialize with the right weights and biases!! maybe read up a bit on this
         for(int i = 0;i<weights.h;i++){
             for(int j = 0;j<weights.w;j++){
                 weights.elements[i][j] =  distribution(generator);
             }
+        }
+    }
+    /*Initialize layer from matrix in format [weights | biases]*/
+    Layer(const vector<vector<double> >& params) {
+        size_t h = params.size(), w = params[0].size() - 1;
+        weights = zero_matrix<double>(h, w);
+        biases = zero_matrix<double>(h, 1);
+
+        for (int i = 0; i < h; i++) {
+            assert(params[i].size() == w+1);
+            for(int j = 0; j < w;j++) {
+                weights.elements[i][j] = params[i][j];
+            }
+            biases.elements[i][0] = params[i][w];
         }
     }
 };
@@ -61,6 +74,8 @@ public:
      }
      learning_rate = learning_r;
    }
+   /*Initilize Network with a chosen (supposedly read) set of layers*/
+   DigitNetwork(vector<Layer> chosen_layers, char loss = L2) : layers(chosen_layers), loss(loss) {}
 
    /*Calculate neuron activations -- i.e forward propagation, floating point number between -0.5 to 0.5 for each neuron */
    vector<vector<double> > inline forward_prop(const Matrix<int> &img);
@@ -77,12 +92,15 @@ public:
     */
    pair<double, double> cost_function(const datalist &data);
 
-   string loss_rep() {
+   string loss_rep() const {
        if (this->loss == L2)
            return "mean square";
        if (this->loss == CROSS_CATEGORICAL_ENTROPY)
            return "CROSS_CATEGORICAL_ENTROPY";
        return "!!invalid loss!!!";
+   }
+   char get_loss() const {
+       return this->loss;
    }
    /*Multiply learning rate by scale*/
    void scale_learning(double scale = .5) {
@@ -213,5 +231,10 @@ inline void back_prop(const int label, vector<vector<vector<double> > >& grad, c
         calced = new_calced;
     }
 }
+
+//Saving the model
+
+void store_model(const DigitNetwork& AI, double loss, double accuracy, string filename="saved_model");
+DigitNetwork load_model(string filename="saved_model");
 
 #endif

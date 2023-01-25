@@ -32,7 +32,7 @@ public:
     }
     Matrix(){}
 
-    Matrix<dType> columnize(){ //Create Matrix which has the same data stored in column shape
+    Matrix<dType> columnize() const { //Create Matrix which has the same data stored in column shape
         vector<vector<dType> > reshaped_data(h*w, vector<dType>(1));
         for(int i = 0;i<h;i++){
             for(int j = 0;j<w;j++){
@@ -43,7 +43,7 @@ public:
         return Matrix<dType>(reshaped_data);
     }
     /*Return the transpose of the matrix*/
-    Matrix<dType> transpose() {
+    Matrix<dType> transpose() const {
         vector<vector<dType> > new_elements(w, vector<dType>(h));
         for (int i = 0; i < h; ++i) {
             for (int j = 0; j < w; ++j) {
@@ -53,7 +53,7 @@ public:
         return Matrix<dType>(new_elements);
     }
 
-    void print(bool print_all = false){
+    void print(bool print_all = false) const {
         int upper_limit = 5;
         if(print_all)
             upper_limit = max(h, w);
@@ -122,11 +122,11 @@ public:
         return Matrix<dType>(res);
     }
 
-    dType operator()(int index) {
+    dType operator()(int index) const {
         assert(w == 1);
         return elements[index][0];
     }
-    dType operator()(int i, int j) {
+    dType operator()(int i, int j) const {
         return elements[i][j];
     }
 };

@@ -1,7 +1,7 @@
 #ifndef HEADER_UTILS
 #define HEADER_UTILS
 
-//#define DEBUG //Comment when not debugging :) !!
+#define DEBUG //Comment when not debugging :) !!
 //#define DISPLAY
 
 #include <cassert>
@@ -23,8 +23,6 @@ using namespace std;
 #include "matrix.hpp"
 
 typedef vector<pair<Matrix<int> , int> > datalist;
-#include "network.hpp"
-
 
 void tool();
 datalist read_training_batch(int batch_size = 60000);

@@ -54,7 +54,7 @@ def main():
         num_labels = file.read(4)
         num_labels = reverseBytes2Int(num_labels)
         print("Label data: ")
-        print("labek magic", label_magic, ' number of labels ', num_labels)
+        print("labek magic", label_magic, 'number of labels', num_labels)
         
         for l in range(3):
             
