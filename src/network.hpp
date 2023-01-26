@@ -94,7 +94,7 @@ public:
 
    string loss_rep() const {
        if (this->loss == L2)
-           return "mean square";
+           return "Mean square";
        if (this->loss == CROSS_CATEGORICAL_ENTROPY)
            return "CROSS_CATEGORICAL_ENTROPY";
        return "!!invalid loss!!!";

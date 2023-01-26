@@ -7,7 +7,7 @@ void store_model(const DigitNetwork& AI, double loss, double accuracy, string fi
 
 	ofstream storage;
 	storage.open(ROOT_FOLDER"\\"+filename+".csv");
-	storage << "Stored Network parameters. Loss:" << loss << " Accuracy:" << accuracy << "\n";
+	storage << "Stored Network parameters. " << AI.loss_rep() << " Loss:" << loss << " Accuracy:" << accuracy << "\n";
 	storage << (int) AI.get_loss() << "\n";
 
 	for (int layer_index = 0; layer_index < AI.layers.size(); layer_index++) {
