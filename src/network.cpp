@@ -32,7 +32,7 @@ void DigitNetwork::train(datalist data, int epochs, int batch_size) {
         this->epoch(data, batch_size);
         auto finished = chrono::high_resolution_clock::now();
         double time = chrono::duration_cast<chrono::nanoseconds>(finished - start).count() * 1e-9;
-        cout << (epoch+1) << ":th epoch performed. (" << time << "s)" << ". Cost now is : " << endl;
+        cout << (epoch+1) << ":th epoch performed. (" << time << "s)" << ". Cost now is : ";
         auto performance = this->cost_function(data);
         cout << fixed << setprecision(10) << performance.first << " accuracy: " << performance.second << " %" << endl;
     }

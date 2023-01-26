@@ -22,7 +22,7 @@ void store_model(const DigitNetwork& AI, double loss, double accuracy, string fi
 		}
 	}
 	storage.close();
-	cout << "Model stored in " << ROOT_FOLDER << "/" << filename << ".csv" << endl;
+	cout << "Model stored in " << ROOT_FOLDER << "\\" << filename << ".csv" << endl;
 }
 
 vector<double> inline read_csv_floats(const string& line){

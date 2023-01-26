@@ -187,14 +187,6 @@ vector<double> DigitNetwork::analyze(const Matrix<int>& img) {
     return {0};
 }
 
-/*Add to_add to the doubles stored at p (simd version of +=)*/
-inline void vecadd_pd(double* p, __m256d to_add) {
-    __m256d loaded = _mm256_loadu_pd(p);
-    __m256d updated = _mm256_add_pd(loaded, to_add);
-    _mm256_storeu_pd(p, updated);
-}
-
-//This function is the bottleneck of the algorithm, it has been modified to run a little faster
 /*Adds contribution of img to grad from img. Grad is a Matrix of the format [weight matrix | biases column], minimizing use of matrices to try and reduce computation time.*/
 inline void back_prop(const int label, vector<vector<vector<double> > >& grad, const vector<vector<double> >& neurons_activations, const vector<Layer>& layers, const vector<double>& output_neuron_derivatives) {
     assert(neurons_activations.size() == grad.size() + 1); //one layer between each group of neurons
