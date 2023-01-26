@@ -39,7 +39,7 @@ void make_model() {
     auto test_res = AI.cost_function(test_data);
     cout << "Test cost is: " << test_res.first << " and test accuracy is: " << test_res.second << "%" << endl;
 
-    cout << "If you would like to save this model type in a name for the file in which to store it. (Empty to not save, and 's' for saved_model)" << endl;
+    cout << "If you would like to save this model type in a name for the file in which to store it ('s' for saved_model) else press (ctr+C) to abort" << endl;
     string fn;
     cin >> fn;
     if (fn.size()) {
