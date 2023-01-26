@@ -20,10 +20,10 @@ void make_model() {
 
     //Training
     AI.train(full_data_set, 15, 100);
-    //AI.scale_learning(.75);
-    //AI.train(full_data_set, 15, 100);
-    //AI.scale_learning(0.75);
-    //AI.train(full_data_set, 20, 100);
+    AI.scale_learning(.75);
+    AI.train(full_data_set, 15, 100);
+    AI.scale_learning(0.75);
+    AI.train(full_data_set, 20, 100);
 
     cout << "AI is trained." << endl;
 
