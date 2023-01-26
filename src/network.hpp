@@ -10,6 +10,8 @@
 #define L2 0
 #define CROSS_CATEGORICAL_ENTROPY 1
 
+#define NUMBER_TRAINING_THREADS 10 // used only in training loop - the bottleneck
+
 class Layer {
 public:
     Matrix<double> biases; //biases used to transform to itself

@@ -24,6 +24,7 @@ double matrix_mean(const Matrix<double>& A) {
 
 void DigitNetwork::train(datalist data, int epochs, int batch_size) {
     cout << "Training AI for " << epochs << " epochs with a batch size of " << batch_size << ". The loss function used is " << this->loss_rep() << " and the learning_rate = " << this->learning_rate << endl;
+    cout << "Beginning first epoch" << endl;
     random_device rd;
     mt19937 g(rd());
     for (int epoch = 0; epoch < epochs; epoch++) {
@@ -47,29 +48,47 @@ void DigitNetwork::epoch(const datalist &data, int batch_size){
         vector<vector<vector<double> > > grad;
         for(auto &layer : this->layers){ grad.push_back(vector<vector<double> >(layer.weights.h, vector<double>(layer.weights.w+1, 0))); }
 
-        for(int i = 0;i<to_process;++i){
-            int data_index = processed + i;
-            const int label = data[data_index].second;
-            const auto &img = data[data_index].first;    
+#pragma omp parallel num_threads(NUMBER_TRAINING_THREADS)
+        {
+            vector<vector<vector<double> > > grad_local;
+            for (auto& layer : this->layers) { grad_local.push_back(vector<vector<double> >(layer.weights.h, vector<double>(layer.weights.w + 1, 0))); }
 
-            vector<vector<double> > neurons_activations = this->forward_prop(img);
-            vector<double> output_derivatives, &output_neurons = *(neurons_activations.end() - 1);
+            int thread_id = omp_get_thread_num();
+            int start = (to_process / NUMBER_TRAINING_THREADS) * thread_id, stop = (to_process / NUMBER_TRAINING_THREADS) * (thread_id +1);
+            if (thread_id == NUMBER_TRAINING_THREADS - 1)
+                stop = to_process;
 
-            switch (this->loss) {
-            case L2:
-                output_derivatives = l2_cost_derivative(output_neurons, label);
-                break;
-            case CROSS_CATEGORICAL_ENTROPY:
-            {
-                auto probs = softmax(output_neurons);
-                output_derivatives = softmax_cost_derivative(output_neurons, probs, label);
-                break;
+            for(int i = start;i<stop;++i){
+                int data_index = processed + i;
+                const int label = data[data_index].second;
+                const auto img = data[data_index].first;    
+
+                vector<vector<double> > neurons_activations = this->forward_prop(img);
+                vector<double> output_derivatives, &output_neurons = *(neurons_activations.end() - 1);
+
+                switch (this->loss) {
+                case L2:
+                    output_derivatives = l2_cost_derivative(output_neurons, label);
+                    break;
+                case CROSS_CATEGORICAL_ENTROPY:
+                {
+                    auto probs = softmax(output_neurons);
+                    output_derivatives = softmax_cost_derivative(output_neurons, probs, label);
+                    break;
+                }
+                default:
+                    assertm(1 == 0, "Loss option is not implemented");
+                }
+
+                back_prop(label, grad_local, neurons_activations, this->layers, output_derivatives );
             }
-            default:
-                assertm(1 == 0, "Loss option is not implemented");
+#pragma omp critical
+            for (int l_ind = 0; l_ind < grad_local.size(); l_ind++) {
+                for (int i = 0; i < grad_local[l_ind].size(); i++) {
+                    for (int j = 0; j < grad_local[l_ind][i].size(); j++)
+                        grad[l_ind][i][j] += grad_local[l_ind][i][j];
+                }
             }
-
-            back_prop(label, grad, neurons_activations, this->layers, output_derivatives );
         }
 
         for(int l_ind = 0;l_ind < grad.size(); l_ind++){
