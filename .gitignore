@@ -2,3 +2,5 @@ data/mnist (1).zip
 .vs
 .vscode
 CppProperties.json
+main.exe
+tester.exe
