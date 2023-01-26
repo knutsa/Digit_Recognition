@@ -211,18 +211,11 @@ inline void back_prop(const int label, vector<vector<vector<double> > >& grad, c
         assert(h == calced.size());
         vector<double> new_calced(w - 1, 0.0);
 
-        for (int i = 0; i < h; i++) { //Optimized with SIMD to decrease time -- This is the bottleneck
-            size_t alignedJ = (w - 1) - ((w - 1) % 4);
+        for (int i = 0; i < h; i++) {
+            
             const double sig_der_calced = sigmoid_der_fromsqueezed(neurons_activations[layer_index+1][i]) * calced[i];
-            __m256d sig_der_vec = _mm256_setr_pd(sig_der_calced, sig_der_calced, sig_der_calced, sig_der_calced);
-            for (int j = 0; j < alignedJ; j += 4) {
-                __m256d neuronsvec = _mm256_loadu_pd(&neurons_activations[layer_index][j]);
-                __m256d weightsvec = _mm256_loadu_pd(&current_layer.weights.elements[i][j]);
-
-                vecadd_pd(&mat[i][j], _mm256_mul_pd(neuronsvec, sig_der_vec));
-                vecadd_pd(&new_calced[j], _mm256_mul_pd(weightsvec, sig_der_vec));
-            }
-            for (int j = alignedJ; j < w - 1; j++) { //last one is the bias -- original loop
+            
+            for (int j = 0; j < w - 1; j++) { //last one is the bias -- original loop
                 mat[i][j] += neurons_activations[layer_index][j] * sig_der_calced; //Derivative with respect to weight
                 new_calced[j] += current_layer.weights.elements[i][j] * sig_der_calced; //Derivative with respect to neuron value --- only used to propagate backwards
             }
