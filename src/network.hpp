@@ -187,14 +187,6 @@ vector<double> DigitNetwork::analyze(const Matrix<int>& img) {
     return {0};
 }
 
-/*Add to_add to the doubles stored at p (simd version of +=)*/
-inline void vecadd_pd(double* p, __m256d to_add) {
-    __m256d loaded = _mm256_loadu_pd(p);
-    __m256d updated = _mm256_add_pd(loaded, to_add);
-    _mm256_storeu_pd(p, updated);
-}
-
-//This function is the bottleneck of the algorithm, it has been modified to run a little faster
 /*Adds contribution of img to grad from img. Grad is a Matrix of the format [weight matrix | biases column], minimizing use of matrices to try and reduce computation time.*/
 inline void back_prop(const int label, vector<vector<vector<double> > >& grad, const vector<vector<double> >& neurons_activations, const vector<Layer>& layers, const vector<double>& output_neuron_derivatives) {
     assert(neurons_activations.size() == grad.size() + 1); //one layer between each group of neurons
@@ -211,18 +203,11 @@ inline void back_prop(const int label, vector<vector<vector<double> > >& grad, c
         assert(h == calced.size());
         vector<double> new_calced(w - 1, 0.0);
 
-        for (int i = 0; i < h; i++) { //Optimized with SIMD to decrease time -- This is the bottleneck
-            size_t alignedJ = (w - 1) - ((w - 1) % 4);
+        for (int i = 0; i < h; i++) {
+            
             const double sig_der_calced = sigmoid_der_fromsqueezed(neurons_activations[layer_index+1][i]) * calced[i];
-            __m256d sig_der_vec = _mm256_setr_pd(sig_der_calced, sig_der_calced, sig_der_calced, sig_der_calced);
-            for (int j = 0; j < alignedJ; j += 4) {
-                __m256d neuronsvec = _mm256_loadu_pd(&neurons_activations[layer_index][j]);
-                __m256d weightsvec = _mm256_loadu_pd(&current_layer.weights.elements[i][j]);
-
-                vecadd_pd(&mat[i][j], _mm256_mul_pd(neuronsvec, sig_der_vec));
-                vecadd_pd(&new_calced[j], _mm256_mul_pd(weightsvec, sig_der_vec));
-            }
-            for (int j = alignedJ; j < w - 1; j++) { //last one is the bias -- original loop
+            
+            for (int j = 0; j < w - 1; j++) { //last one is the bias -- original loop
                 mat[i][j] += neurons_activations[layer_index][j] * sig_der_calced; //Derivative with respect to weight
                 new_calced[j] += current_layer.weights.elements[i][j] * sig_der_calced; //Derivative with respect to neuron value --- only used to propagate backwards
             }

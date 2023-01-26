@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void make_model(){
+void make_model() {
 
     cout << "Reading data" << endl;
     datalist full_data_set = read_training_batch();
@@ -11,19 +11,19 @@ void make_model(){
 
     //full_data_set = preprocess(full_data_set);
     int hidden1 = 60, hidden2 = 60;
-    DigitNetwork AI({784, hidden1, hidden2, 10}, 2.0);
-    cout << "Neural Network initialized with random weights. Network size is 784 x " << hidden1 << " x " <<  hidden2 << " x 10" << endl;
+    DigitNetwork AI({ 784, hidden1, hidden2, 10 }, 2.0);
+    cout << "Neural Network initialized with random weights. Network size is 784 x " << hidden1 << " x " << hidden2 << " x 10" << endl;
     cout << "Initial cost: ";
     auto res = AI.cost_function(full_data_set);
     double initial_cost = res.first, initial_accuracy = res.second;
     cout << fixed << setprecision(10) << initial_cost << " initial accuracy: " << initial_accuracy << "%" << endl;
-  
+
     //Training
     AI.train(full_data_set, 15, 100);
-    AI.scale_learning(.75);
-    AI.train(full_data_set, 15, 100);
-    AI.scale_learning(0.75);
-    AI.train(full_data_set, 20, 100);
+    //AI.scale_learning(.75);
+    //AI.train(full_data_set, 15, 100);
+    //AI.scale_learning(0.75);
+    //AI.train(full_data_set, 20, 100);
 
     cout << "AI is trained." << endl;
 
@@ -33,8 +33,8 @@ void make_model(){
     cout << "Reminding, initial cost was: " << initial_cost << " and initial accuracy was " << initial_accuracy << " %" << endl;
     auto final_res = AI.cost_function(full_data_set);
     double final_cost = final_res.first, final_accuracy = final_res.second;
-    cout << "Final Cost is: "  << final_cost << " and the network has a training accuracy of: " << final_accuracy << " %" << endl;
-    
+    cout << "Final Cost is: " << final_cost << " and the network has a training accuracy of: " << final_accuracy << " %" << endl;
+
     datalist test_data = read_test_data();
     auto test_res = AI.cost_function(test_data);
     cout << "Test cost is: " << test_res.first << " and test accuracy is: " << test_res.second << "%" << endl;
@@ -44,8 +44,8 @@ void make_model(){
     cin >> fn;
     if (fn.size()) {
         if (fn == "s")
-            fn = "saved_model";
-        store_model(AI, test_res.first, test_res.second, fn);
+    fn = "saved_model";
+    store_model(AI, test_res.first, test_res.second, fn);
     }
 }
 
