@@ -6,7 +6,7 @@ The code implements a simple Neural Network class that uses standard SGD with co
 ## How to run
 Compile all files in the src folder and then run, e.g
 ```
- g++ src/*.cpp -fopenmp -o main
+ g++ -O3 src/*.cpp -fopenmp -o main
  ./main
 ```
 No libraries needed!
