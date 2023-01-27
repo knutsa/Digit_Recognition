@@ -10,7 +10,7 @@ void make_model() {
     cout << "Done reading " << full_data_set.size() << " images" << endl;
 
     //full_data_set = preprocess(full_data_set);
-    int hidden1 = 60, hidden2 = 60;
+    int hidden1 = 70, hidden2 = 70;
     DigitNetwork AI({ 784, hidden1, hidden2, 10 }, 2.0);
     cout << "Neural Network initialized with random weights. Network size is 784 x " << hidden1 << " x " << hidden2 << " x 10" << endl;
     cout << "Initial cost: ";
@@ -19,11 +19,9 @@ void make_model() {
     cout << fixed << setprecision(10) << initial_cost << " initial accuracy: " << initial_accuracy << "%" << endl;
 
     //Training
-    AI.train(full_data_set, 15, 100);
-    AI.scale_learning(.75);
-    AI.train(full_data_set, 15, 100);
-    AI.scale_learning(0.75);
     AI.train(full_data_set, 20, 100);
+    AI.scale_learning(.5);
+    AI.train(full_data_set, 30, 100);
 
     cout << "AI is trained." << endl;
 
